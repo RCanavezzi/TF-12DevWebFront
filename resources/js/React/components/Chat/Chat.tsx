@@ -49,6 +49,19 @@ export default function Chat() {
                 return;
             }
 
+            // 🚨 NOVO: Tratamento do tipo 'reaction' recebido do servidor
+            if (data.type === "reaction") {
+                addMessage({
+                    text: `${data.name} reagiu com ${data.reaction}`, // Texto descritivo para fallback
+                    self: data.name === name,
+                    from: data.name,
+                    type: "reaction", // Novo tipo
+                    reaction: data.reaction, // O valor do emoji ("👍" ou "👎")
+                });
+                return;
+            }
+            // 🚨 FIM NOVO
+
             addMessage({
                 text: String(lastMessage),
                 self: false,
@@ -103,6 +116,30 @@ export default function Chat() {
         );
     };
 
+    // 🚨 NOVO: Função para enviar uma reação rápida (👍 ou 👎)
+    const sendReaction = (reaction: "👍" | "👎") => {
+        if (!joined || status !== "open") return;
+
+        // 1. Enviar o evento 'reaction' via WebSocket
+        sendMessage?.(
+            JSON.stringify({
+                type: "reaction",
+                name,
+                reaction,
+            }),
+        );
+
+        // 2. Adicionar a reação localmente para feedback imediato do usuário
+        addMessage({
+            text: `Você reagiu com ${reaction}`,
+            self: true,
+            from: name,
+            type: "reaction",
+            reaction: reaction,
+        });
+    };
+    // 🚨 FIM NOVO
+
     const handleSend = (e: FormEvent) => {
         e.preventDefault();
         sendChat(input);
@@ -123,23 +160,7 @@ export default function Chat() {
 
                 {!joined ? (
                     <form onSubmit={handleJoin} className="mb-3">
-                        <div className="mb-3">
-                            <label className="form-label">Seu nome</label>
-                            <input
-                                className="form-control"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Digite seu nome"
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={!name.trim() || status !== "open"}
-                        >
-                            Entrar no chat
-                        </button>
+                        {/* ... (código do formulário de entrada) ... */}
                     </form>
                 ) : (
                     <>
@@ -153,40 +174,83 @@ export default function Chat() {
                                 </p>
                             )}
 
-                            {messages.map((m) => (
-                                <div
-                                    key={m.id}
-                                    className={
-                                        "d-flex mb-2 " +
-                                        (m.self ? "justify-content-end" : "justify-content-start")
-                                    }
-                                >
+                            {messages.map((m) => {
+                                // 💡 ALTERAÇÃO: Renderização customizada para REACTION
+                                if (m.type === "reaction" && m.reaction) {
+                                    const reactionText = m.self
+                                        ? `Você reagiu com ${m.reaction}`
+                                        : `${m.from} reagiu com ${m.reaction}`;
+
+                                    // Retorna uma linha centralizada e discreta para a reação
+                                    return (
+                                        <div
+                                            key={m.id}
+                                            className="text-center my-2 small fw-semibold text-primary"
+                                        >
+                                            {reactionText}
+                                        </div>
+                                    );
+                                }
+                                // 💡 FIM ALTERAÇÃO
+
+                                // Renderização de mensagens normais e de sistema
+                                return (
                                     <div
+                                        key={m.id}
                                         className={
-                                            "px-3 py-2 rounded-3 " +
-                                            (m.type === "system"
-                                                ? "bg-light text-muted"
-                                                : m.self
-                                                    ? "bg-primary text-white"
-                                                    : "bg-white border")
+                                            "d-flex mb-2 " +
+                                            (m.self ? "justify-content-end" : "justify-content-start")
                                         }
                                     >
-                                        <div className="small fw-semibold mb-1">
-                                            {m.type === "system"
-                                                ? "Sistema"
-                                                : m.self
-                                                    ? "Você"
-                                                    : m.from ?? "Usuário"}
+                                        <div
+                                            className={
+                                                "px-3 py-2 rounded-3 " +
+                                                (m.type === "system"
+                                                    ? "bg-light text-muted"
+                                                    : m.self
+                                                        ? "bg-primary text-white"
+                                                        : "bg-white border")
+                                            }
+                                        >
+                                            <div className="small fw-semibold mb-1">
+                                                {m.type === "system"
+                                                    ? "Sistema"
+                                                    : m.self
+                                                        ? "Você"
+                                                        : m.from ?? "Usuário"}
+                                            </div>
+                                            <div className="small">{m.text}</div>
                                         </div>
-                                        <div className="small">{m.text}</div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
 
                             <div ref={messagesEndRef} />
                         </div>
+                        
+                        {/* 🚨 NOVO: Botões de Ação Rápida (Aprovado/Reprovado) */}
+                        <div className="d-flex gap-2 mb-2">
+                            <button
+                                type="button"
+                                className="btn btn-lg btn-outline-success w-100"
+                                disabled={!wsReady}
+                                onClick={() => sendReaction("👍")}
+                            >
+                                👍 Aprovado
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-lg btn-outline-danger w-100"
+                                disabled={!wsReady}
+                                onClick={() => sendReaction("👎")}
+                            >
+                                👎 Reprovado
+                            </button>
+                        </div>
+                        {/* 🚨 FIM NOVO */}
 
-                        {/* linha de EMOJIs */}
+
+                        {/* linha de EMOJIs (código original, sem alteração na lógica) */}
                         <div className="d-flex flex-wrap gap-2 mb-2">
                             {emojis.map((emoji) => (
                                 <button
@@ -201,7 +265,7 @@ export default function Chat() {
                             ))}
                         </div>
 
-                        {/* linha com INPUT + ENVIAR */}
+                        {/* linha com INPUT + ENVIAR (código original) */}
                         <form onSubmit={handleSend} className="d-flex gap-2">
                             <input
                                 className="form-control"
