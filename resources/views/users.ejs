@@ -1,0 +1,68 @@
+<% layout('./layouts/main') -%>
+
+<main class="container my-4">
+  <!-- Saudação ao usuário logado -->
+  <div class="card mb-4">
+    <div class="card-body text-center p-5">
+      <h1 class="display-6 fw-semibold mb-2">Olá <%= user.name %></h1>
+      <p class="text-secondary mb-4">Você está autenticado. Use o botão abaixo para continuar ou sair da sessão.</p>
+
+      <div class="d-flex gap-2 justify-content-center">
+        <button class="btn btn-outline-danger px-4" id="btn-sair">Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de todos os usuários -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="h4 mb-0">Lista de Usuários</h2>
+      <small class="text-muted">Total: <%= users.length %> usuário(s)</small>
+    </div>
+    <div class="card-body">
+      <% if (users.length === 0) { %>
+        <p class="text-center text-muted">Nenhum usuário encontrado.</p>
+      <% } else { %>
+        <div class="row">
+          <% for (const userItem of users) { %>
+            <div class="col-md-6 col-lg-4 mb-3">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-3">
+                    <% if (userItem.photo) { %>
+                      <img src="/img/<%= userItem.photo %>" 
+                           alt="Foto de <%= userItem.name %>" 
+                           class="rounded-circle me-3" 
+                           style="width: 50px; height: 50px; object-fit: cover;">
+                    <% } else { %>
+                      <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center text-white" 
+                           style="width: 50px; height: 50px; font-size: 20px;">
+                        👤
+                      </div>
+                    <% } %>
+                    <div>
+                      <h5 class="card-title mb-1">
+                        <%= userItem.name %>
+                        <% if (userItem.id === user.id) { %>
+                          <span class="badge bg-primary ms-1">Você</span>
+                        <% } %>
+                      </h5>
+                      <p class="card-text text-muted mb-0">
+                        <small><%= userItem.email %></small>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="text-muted">
+                    <small>
+                      🕒 Membro desde: <%= new Date(userItem.created_at).toLocaleDateString('pt-BR') %>
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</main>

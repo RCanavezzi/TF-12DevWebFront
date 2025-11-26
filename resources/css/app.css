@@ -1,0 +1,63 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import '@fortawesome/fontawesome-free/css/all.css';
+
+* {
+    /* Remove margens externas padrão ↓ */
+    margin: 0;
+    /* Remove paddings internos padrão ↓ */
+    padding: 0;
+    /* Calcula largura incluindo borda e padding ↓ */
+    box-sizing: border-box;
+    /* Define fonte padrão ↓ */
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+html {
+    min-height: 100vh;
+}
+
+body {
+    /* Cor de fundo da página ↓ */
+    background: #ffffff;
+    /* Cor padrão do texto ↓ */
+    color: #111827;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex-grow: 1;
+}
+
+header,
+footer {
+    flex-grow: 0;
+    /* Fundo azul escuro ↓ */
+    background: #004d7a;
+}
+
+
+h1 {
+    /* Tamanho maior para títulos ↓ */
+    font-size: 36px;
+}
+
+#app {
+    padding: 40px 0;
+}
+
+
+img#squirtle {
+    /* Limita largura máxima das imagens ↓ */
+    max-width: 100%;
+    width: 200px;
+    display: block;
+    margin: auto;
+}
+
+#form-login {
+    padding: 20px;
+    border: 1px solid #CCCCCC;
+    border-radius: 10px;
+}
